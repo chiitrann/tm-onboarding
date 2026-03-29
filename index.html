@@ -1,0 +1,203 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+.wrap{display:flex;justify-content:center;padding:1rem 0}
+.phone{width:393px;height:752px;background:#141e24;border-radius:52px;overflow:hidden;border:1px solid #1e2d36;display:flex;flex-direction:column;position:relative}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;padding:56px 32px 44px;opacity:0;transform:translateX(40px);transition:opacity 0.55s cubic-bezier(0.4,0,0.2,1),transform 0.55s cubic-bezier(0.4,0,0.2,1);pointer-events:none}
+.screen.active{opacity:1;transform:translateX(0);pointer-events:all}
+.screen.out{opacity:0;transform:translateX(-40px)}
+.topbar{display:flex;justify-content:flex-end;margin-bottom:0}
+.skip-btn{font-size:14px;color:rgba(255,255,255,0.3);cursor:pointer;font-weight:400}
+.visual{flex:1;display:flex;align-items:center;justify-content:center;position:relative}
+.copy{text-align:center;margin-bottom:24px}
+.copy h1{font-size:30px;font-weight:300;color:#fff;line-height:1.25;margin-bottom:12px;letter-spacing:-0.02em}
+.copy p{font-size:15px;color:rgba(255,255,255,0.45);line-height:1.7;font-weight:400}
+.prog{display:flex;gap:5px;justify-content:center;margin-bottom:20px}
+.prog span{height:3px;border-radius:2px;transition:all 0.4s}
+.prog span.on{width:22px;background:#2ecc8e}
+.prog span:not(.on){width:6px;background:rgba(255,255,255,0.15)}
+.next-btn{background:#2ecc8e;border:none;border-radius:20px;padding:18px;font-size:16px;font-weight:500;color:#fff;cursor:pointer;width:100%;font-family:'Inter',sans-serif;letter-spacing:0.01em;transition:transform 0.15s,opacity 0.15s}
+.next-btn:active{transform:scale(0.98);opacity:0.9}
+.next-btn.white{background:#fff;color:#141e24}
+
+.card{position:absolute;background:rgba(255,255,255,0.06);border:0.5px solid rgba(255,255,255,0.1);border-radius:18px;padding:14px 16px;opacity:0;transition:opacity 0.6s ease,transform 0.6s cubic-bezier(0.34,1.56,0.64,1)}
+.card.shown{opacity:1}
+.card .ct{font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:5px;font-weight:400}
+.card .cm{font-size:13px;color:rgba(255,255,255,0.8);line-height:1.4;font-weight:400}
+.card.green{background:rgba(46,204,142,0.1);border-color:rgba(46,204,142,0.25)}
+.card.green .cm{color:#2ecc8e}
+.card.green .ct{color:rgba(46,204,142,0.5)}
+
+.mem-list{width:100%;display:flex;flex-direction:column;gap:8px}
+.mem-item{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.05);border:0.5px solid rgba(255,255,255,0.08);border-radius:14px;padding:13px 16px;opacity:0;transform:translateY(12px);transition:all 0.5s}
+.mem-item.in{opacity:1;transform:translateY(0)}
+.mem-dot{width:6px;height:6px;border-radius:50%;background:#2ecc8e;flex-shrink:0}
+.mem-text{font-size:12px;color:rgba(255,255,255,0.6);flex:1}
+.mem-time{font-size:11px;color:rgba(255,255,255,0.2)}
+
+.prep{width:100%;background:rgba(255,255,255,0.05);border:0.5px solid rgba(255,255,255,0.1);border-radius:20px;padding:20px;opacity:0;transform:translateY(16px);transition:all 0.6s}
+.prep.in{opacity:1;transform:translateY(0)}
+.prep-tag{font-size:10px;font-weight:500;color:#2ecc8e;letter-spacing:0.08em;margin-bottom:10px}
+.prep-name{font-size:16px;font-weight:500;color:#fff;margin-bottom:4px}
+.prep-when{font-size:12px;color:rgba(255,255,255,0.3);margin-bottom:16px}
+.prep-line{height:0.5px;background:rgba(255,255,255,0.07);margin-bottom:14px}
+.prep-row{display:flex;gap:8px;margin-bottom:9px;align-items:flex-start}
+.prep-tick{width:15px;height:15px;border-radius:50%;border:1px solid rgba(46,204,142,0.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.prep-row-text{font-size:12px;color:rgba(255,255,255,0.45);line-height:1.4}
+</style>
+
+<div class="wrap">
+<div class="phone">
+
+<canvas id="bg" width="393" height="752" style="position:absolute;top:0;left:0;opacity:0.4"></canvas>
+
+<div class="screen active" id="s1">
+  <div class="topbar"><span class="skip-btn" onclick="goTo(1)">Skip</span></div>
+  <div class="visual" style="position:relative;height:280px">
+
+    <div style="position:absolute;width:120px;height:120px;border-radius:50%;background:rgba(46,204,142,0.06);top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+    <div style="position:absolute;width:80px;height:80px;border-radius:50%;background:rgba(46,204,142,0.1);top:50%;left:50%;transform:translate(-50%,-50%)" id="mic-ring"></div>
+    <div style="position:absolute;width:44px;height:44px;border-radius:50%;background:rgba(46,204,142,0.2);top:50%;left:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2ecc8e" stroke-width="1.5" stroke-linecap="round"><path d="M12 1a4 4 0 0 1 4 4v7a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+    </div>
+
+    <div class="card" id="card0" style="left:20px;top:30px;max-width:160px;transform:translateY(10px)">
+      <div class="ct">yesterday · 2:14pm</div>
+      <div class="cm">"follow up with Sarah on the proposal"</div>
+    </div>
+    <div class="card" id="card1" style="right:16px;top:55px;max-width:150px;transform:translateY(10px)">
+      <div class="ct">monday · lecture</div>
+      <div class="cm">"the deadline was moved to Friday"</div>
+    </div>
+    <div class="card green" id="card2" style="left:24px;bottom:30px;max-width:160px;transform:translateY(10px)">
+      <div class="ct">just now</div>
+      <div class="cm">"remind me what Daniel said last week"</div>
+    </div>
+
+  </div>
+  <div class="copy">
+    <h1>Life moves fast.<br>Important things<br>get forgotten.</h1>
+    <p>TwinMind remembers every conversation, lecture, and idea — so you never lose what matters.</p>
+  </div>
+  <div class="prog"><span class="on"></span><span></span><span></span></div>
+  <button class="next-btn" onclick="goTo(1)">Next</button>
+</div>
+
+<div class="screen" id="s2">
+  <div class="topbar"><span class="skip-btn" onclick="goTo(2)">Skip</span></div>
+  <div class="visual">
+    <div class="mem-list">
+      <div class="mem-item" id="m0"><div class="mem-dot"></div><span class="mem-text">"follow up with Sarah on the proposal"</span><span class="mem-time">yesterday</span></div>
+      <div class="mem-item" id="m1"><div class="mem-dot"></div><span class="mem-text">"the deadline was moved to Friday"</span><span class="mem-time">monday</span></div>
+      <div class="mem-item" id="m2"><div class="mem-dot"></div><span class="mem-text">"budget review needs sign-off from Daniel"</span><span class="mem-time">last week</span></div>
+      <div class="mem-item" id="m3"><div class="mem-dot"></div><span class="mem-text">"new onboarding flow — check Figma"</span><span class="mem-time">tuesday</span></div>
+    </div>
+  </div>
+  <div class="copy">
+    <h1>Just ask.<br>TwinMind finds it<br>instantly.</h1>
+    <p>Every conversation, lecture, and idea — retrieved in seconds, no matter when it happened.</p>
+  </div>
+  <div class="prog"><span></span><span class="on"></span><span></span></div>
+  <button class="next-btn" onclick="goTo(2)">Next</button>
+</div>
+
+<div class="screen" id="s3">
+  <div class="topbar"><span class="skip-btn" style="opacity:0">Skip</span></div>
+  <div class="visual">
+    <div class="prep" id="pc">
+      <div class="prep-tag">TWINMIND PREP</div>
+      <div class="prep-name">Design Review Meeting</div>
+      <div class="prep-when">Today · 12:10PM · in 45 min</div>
+      <div class="prep-line"></div>
+      <div class="prep-row">
+        <div class="prep-tick"><svg width="8" height="8" viewBox="0 0 12 12" fill="none" stroke="#2ecc8e" stroke-width="2"><polyline points="2 6 5 9 10 3"/></svg></div>
+        <span class="prep-row-text">Last discussed Q3 design system updates with Paurush</span>
+      </div>
+      <div class="prep-row">
+        <div class="prep-tick"><svg width="8" height="8" viewBox="0 0 12 12" fill="none" stroke="#2ecc8e" stroke-width="2"><polyline points="2 6 5 9 10 3"/></svg></div>
+        <span class="prep-row-text">1 open action item — share updated Figma components</span>
+      </div>
+    </div>
+  </div>
+  <div class="copy">
+    <h1>Walk into every<br>moment fully<br>prepared.</h1>
+    <p>TwinMind connects the dots before you even think to ask.</p>
+  </div>
+  <div class="prog"><span></span><span></span><span class="on"></span></div>
+  <button class="next-btn white" onclick="goTo(0)">Get started</button>
+</div>
+
+</div>
+</div>
+
+<script>
+let cur=0;
+
+const bgCanvas=document.getElementById('bg');
+const bgCtx=bgCanvas.getContext('2d');
+const particles=[];
+for(let i=0;i<40;i++){
+  particles.push({x:Math.random()*393,y:Math.random()*752,r:Math.random()*1.5+0.5,vx:(Math.random()-0.5)*0.3,vy:-Math.random()*0.4-0.1,opacity:Math.random()*0.4+0.1});
+}
+function drawBg(){
+  bgCtx.clearRect(0,0,393,752);
+  particles.forEach(p=>{
+    p.x+=p.vx;p.y+=p.vy;
+    if(p.y<-5){p.y=757;p.x=Math.random()*393;}
+    if(p.x<0)p.x=393;if(p.x>393)p.x=0;
+    bgCtx.beginPath();
+    bgCtx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    bgCtx.fillStyle=`rgba(46,204,142,${p.opacity})`;
+    bgCtx.fill();
+  });
+  requestAnimationFrame(drawBg);
+}
+drawBg();
+
+let micT=0;
+function pulseMic(){
+  micT+=0.04;
+  const ring=document.getElementById('mic-ring');
+  if(ring){const s=1+Math.sin(micT)*0.08;ring.style.transform=`translate(-50%,-50%) scale(${s})`;}
+  requestAnimationFrame(pulseMic);
+}
+pulseMic();
+
+function animCards(){
+  setTimeout(()=>{
+    const c=document.getElementById('card0');
+    if(c){c.classList.add('shown');c.style.transform='translateY(0)';}
+  },200);
+  setTimeout(()=>{
+    const c=document.getElementById('card1');
+    if(c){c.classList.add('shown');c.style.transform='translateY(0)';}
+  },500);
+  setTimeout(()=>{
+    const c=document.getElementById('card2');
+    if(c){c.classList.add('shown');c.style.transform='translateY(0)';}
+  },800);
+}
+
+function goTo(n){
+  const ids=['s1','s2','s3'];
+  document.getElementById(ids[cur]).classList.remove('active');
+  document.getElementById(ids[cur]).classList.add('out');
+  setTimeout(()=>document.getElementById(ids[cur]).classList.remove('out'),600);
+  cur=n;
+  document.getElementById(ids[n]).classList.add('active');
+  if(n===1){
+    ['m0','m1','m2','m3'].forEach((id,i)=>{
+      const el=document.getElementById(id);
+      el.classList.remove('in');
+      setTimeout(()=>el.classList.add('in'),i*160+100);
+    });
+  }
+  if(n===2){
+    const pc=document.getElementById('pc');
+    pc.classList.remove('in');
+    setTimeout(()=>pc.classList.add('in'),150);
+  }
+}
+
+animCards();
+</script>
